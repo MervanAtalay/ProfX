@@ -1,6 +1,6 @@
 # Real-time Emotion Detection
 #To activate : .\ai_teacher_env\Scripts\activate
-# ssh root@159.198.77.153 (melis123)
+# ssh root@159.198.77.153 (hint:ms123)
 # project location on remote : /var/www/ai_teacher
 # https://github.com/MervanAtalay/ProfX.git
 A Python application that uses your computer's webcam to detect human faces and analyze their emotions in real-time using OpenCV and DeepFace.
@@ -142,4 +142,5 @@ Daha dar tolerance (0.3 saniye)
 5. UI İyileştirmeleri
 Exam emotion legend eklendi
 "1.5s delay" indicator
+
 Buffer status güncellemesi
