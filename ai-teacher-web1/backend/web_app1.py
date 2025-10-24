@@ -1,25 +1,51 @@
+# Production mode imports
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
-import cv2
-import numpy as np
-from deepface import DeepFace
-import base64
+from datetime import datetime
+from typing import Dict, List, Optional
 import json
 import os
-from datetime import datetime
 import sqlite3
+import asyncio
+import platform
 
-# Import your existing classes (we'll adapt them)
-import sys
-sys.path.append('..')
+# Check if production (Linux) or development (Windows)
+IS_PRODUCTION = platform.system() == "Linux"
 
+# Disable heavy ML libraries on production
+DEEPFACE_AVAILABLE = False
+OPENCV_AVAILABLE = False
+
+if IS_PRODUCTION:
+    print("🚀 PRODUCTION MODE - Running on VPS")
+    print("⚠️ Emotion detection DISABLED (saves resources)")
+else:
+    print("💻 DEVELOPMENT MODE")
+    try:
+        import cv2
+        import numpy as np
+        import base64
+        OPENCV_AVAILABLE = True
+        print("✅ OpenCV available")
+    except:
+        print("⚠️ OpenCV not available")
+    
+    try:
+        from deepface import DeepFace
+        DEEPFACE_AVAILABLE = True
+        print("✅ DeepFace available")
+    except:
+        print("⚠️ DeepFace not available")
+
+# Import Gemini (works on both)
 try:
     from google import genai
     GEMINI_AVAILABLE = True
+    print("✅ Gemini library available")
 except ImportError:
     GEMINI_AVAILABLE = False
+    print("⚠️ Gemini library not available")
 
 app = FastAPI(title="AI Virtual Teacher API")
 
