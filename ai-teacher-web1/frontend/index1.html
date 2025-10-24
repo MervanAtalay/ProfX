@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 AI Virtual Teacher</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr 350px;
+            gap: 20px;
+            padding: 20px;
+            min-height: 600px;
+        }
+        
+        .panel {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+        }
+        
+        .panel h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .video-container {
+            position: relative;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        
+        #video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .emotion-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.9);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .conversation {
+            height: 400px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        
+        .message.teacher {
+            background: #e3f2fd;
+            border-left: 4px solid #667eea;
+        }
+        
+        .message.student {
+            background: #f1f8e9;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .message .speaker {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .input-group input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        
+        .input-group button {
+            padding: 12px 25px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4caf50;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .progress-log {
+            height: 300px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 0.9em;
+        }
+        
+        .progress-log div {
+            margin-bottom: 8px;
+            padding: 5px;
+            border-left: 3px solid #667eea;
+            padding-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AI Virtual Teacher</h1>
+            <p>Smart Teaching with Emotion Detection</p>
+        </div>
+        
+        <div class="main-content">
+            <!-- Left Panel: Profile & Controls -->
+            <div class="panel">
+                <h2>👤 Student Profile</h2>
+                
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" id="studentName" placeholder="Your name">
+                </div>
+                
+                <div class="form-group">
+                    <label>Age</label>
+                    <input type="number" id="studentAge" placeholder="Your age">
+                </div>
+                
+                <div class="form-group">
+                    <label>Grade</label>
+                    <input type="text" id="studentGrade" placeholder="Your grade">
+                </div>
+                
+                <button class="btn btn-primary" onclick="saveProfile()">💾 Save Profile</button>
+                
+                <hr style="margin: 20px 0; border: none; border-top: 2px solid #e0e0e0;">
+                
+                <h2 style="margin-top: 20px;">🎓 Lesson Controls</h2>
+                
+                <div class="form-group">
+                    <label>Language</label>
+                    <select id="language" onchange="changeLanguage()">
+                        <option value="en">English</option>
+                        <option value="tr">Türkçe</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Select Lesson</label>
+                    <select id="lesson">
+                        <option value="mathematics">Mathematics</option>
+                    </select>
+                </div>
+                
+                <button class="btn btn-primary" id="startBtn" onclick="startLesson()">▶️ Start Lesson</button>
+                <button class="btn btn-danger" id="stopBtn" onclick="stopLesson()" disabled>⏹️ Stop Lesson</button>
+                
+                <div class="video-container" style="margin-top: 20px;">
+                    <video id="video" autoplay muted></video>
+                    <div class="emotion-badge" id="emotionBadge">😐 neutral</div>
+                </div>
+            </div>
+            
+            <!-- Middle Panel: Conversation -->
+            <div class="panel">
+                <h2>💬 Conversation</h2>
+                <div class="conversation" id="conversation"></div>
+                
+                <div class="input-group">
+                    <input type="text" id="messageInput" placeholder="Type your answer or question..." onkeypress="handleEnter(event)">
+                    <button onclick="sendMessage()">📤 Send</button>
+                </div>
+            </div>
+            
+            <!-- Right Panel: Status & Progress -->
+            <div class="panel">
+                <h2>📊 Status</h2>
+                
+                <div class="status">
+                    <div class="status-dot" id="statusDot"></div>
+                    <span id="statusText">Ready to start</span>
+                </div>
+                
+                <div class="status">
+                    <span><strong>Session:</strong> <span id="sessionId">Not started</span></span>
+                </div>
+                
+                <h2 style="margin-top: 20px;">📈 Progress Log</h2>
+                <div class="progress-log" id="progressLog"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Global state
+        let ws = null;
+        let sessionId = 'session_' + Date.now();
+        let currentLanguage = 'en';
+        let videoStream = null;
+        let lessonActive = false;
+        let currentEmotion = 'neutral';
+        
+        // Initialize
+        document.getElementById('sessionId').textContent = sessionId;
+        
+        // Start camera
+        async function startCamera() {
+            try {
+                videoStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 640, height: 480 } 
+                });
+                document.getElementById('video').srcObject = videoStream;
+                addProgress('✅ Camera started');
+            } catch (error) {
+                console.error('Camera error:', error);
+                addProgress('❌ Camera access denied');
+            }
+        }
+        
+        // WebSocket for emotion detection
+        function startEmotionDetection() {
+            ws = new WebSocket(`ws://localhost:8000/ws/emotion/${sessionId}`);
+            
+            ws.onopen = () => {
+                addProgress('✅ Connected to emotion detector');
+                
+                // Send frames periodically
+                setInterval(() => {
+                    if (videoStream && ws.readyState === WebSocket.OPEN) {
+                        const video = document.getElementById('video');
+                        const canvas = document.createElement('canvas');
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(video, 0, 0);
+                        
+                        const imageData = canvas.toDataURL('image/jpeg', 0.7);
+                        ws.send(imageData);
+                    }
+                }, 1000);
+            };
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                currentEmotion = data.emotion;
+                updateEmotion(data.emotion);
+            };
+            
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                addProgress('❌ Emotion detection error');
+            };
+        }
+        
+        function updateEmotion(emotion) {
+            const badge = document.getElementById('emotionBadge');
+            const emotionIcons = {
+                'confident': '😊',
+                'focused': '🧐',
+                'confused': '😕',
+                'frustrated': '😤',
+                'anxiety': '😰',
+                'curious': '🤔',
+                'bored': '😑',
+                'neutral': '😐'
+            };
+            badge.textContent = `${emotionIcons[emotion] || '😐'} ${emotion}`;
+        }
+        
+        function saveProfile() {
+            const name = document.getElementById('studentName').value;
+            const age = document.getElementById('studentAge').value;
+            const grade = document.getElementById('studentGrade').value;
+            
+            if (!name || !age || !grade) {
+                alert('Please fill all profile fields');
+                return;
+            }
+            
+            fetch('http://localhost:8000/api/profile', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ name, age: parseInt(age), grade })
+            })
+            .then(r => r.json())
+            .then(() => {
+                addProgress(`✅ Profile saved: ${name}`);
+                addMessage('teacher', `Nice to meet you, ${name}! Ready to learn?`);
+            })
+            .catch(err => console.error('Profile save error:', err));
+        }
+        
+        function changeLanguage() {
+            currentLanguage = document.getElementById('language').value;
+            addProgress(`🌐 Language changed to ${currentLanguage}`);
+        }
+        
+        function startLesson() {
+            lessonActive = true;
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            document.getElementById('statusText').textContent = 'Lesson in progress';
+            
+            const lesson = document.getElementById('lesson').value;
+            addProgress(`🎓 Starting lesson: ${lesson}`);
+            addMessage('teacher', "Let's begin! I'll ask you some questions. Take your time to think and answer.");
+        }
+        
+        function stopLesson() {
+            lessonActive = false;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('statusText').textContent = 'Lesson stopped';
+            
+            addProgress('⏹️ Lesson stopped');
+            addMessage('teacher', "Lesson ended. You can still chat with me anytime!");
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            addMessage('student', message);
+            input.value = '';
+            
+            // Send to backend
+            fetch('http://localhost:8000/api/chat', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    message: message,
+                    session_id: sessionId,
+                    language: currentLanguage
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                addMessage('teacher', data.response);
+                speakText(data.response);
+            })
+            .catch(err => console.error('Chat error:', err));
+        }
+        
+        function handleEnter(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+        
+        function addMessage(type, text) {
+            const conv = document.getElementById('conversation');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${type}`;
+            
+            const speaker = type === 'teacher' ? '🤖 AI Teacher' : '👤 You';
+            msgDiv.innerHTML = `
+                <div class="speaker">${speaker}</div>
+                <div>${text}</div>
+            `;
+            
+            conv.appendChild(msgDiv);
+            conv.scrollTop = conv.scrollHeight;
+        }
+        
+        function addProgress(text) {
+            const log = document.getElementById('progressLog');
+            const time = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.textContent = `[${time}] ${text}`;
+            log.appendChild(div);
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.9;
+                utterance.pitch = 1.1;
+                speechSynthesis.speak(utterance);
+            }
+        }
+        
+        // Initialize on load
+        window.onload = () => {
+            startCamera();
+            startEmotionDetection();
+            addProgress('🚀 System initialized');
+        };
+    </script>
+</body>
+</html>

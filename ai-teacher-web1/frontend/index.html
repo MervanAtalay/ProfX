@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 AI Virtual Teacher</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .system-status {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+        }
+        
+        .status-badge {
+            padding: 5px 15px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 15px;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 320px 1fr 380px;
+            gap: 20px;
+            padding: 20px;
+            min-height: 700px;
+        }
+        
+        .panel {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+        }
+        
+        .panel h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .video-container {
+            position: relative;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        
+        #video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .emotion-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.95);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.1em;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover:not(:disabled) {
+            background: #218838;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover:not(:disabled) {
+            background: #c82333;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .conversation {
+            height: 450px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 10px;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .message.teacher {
+            background: #e3f2fd;
+            border-left: 4px solid #667eea;
+        }
+        
+        .message.student {
+            background: #f1f8e9;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .message.system {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            font-style: italic;
+        }
+        
+        .message .speaker {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 0.95em;
+        }
+        
+        .message .text {
+            line-height: 1.5;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .input-group input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .input-group button {
+            padding: 12px 25px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .input-group button:hover {
+            background: #5568d3;
+        }
+        
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4caf50;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .progress-log {
+            height: 320px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 0.9em;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .progress-log div {
+            margin-bottom: 8px;
+            padding: 8px;
+            border-left: 3px solid #667eea;
+            padding-left: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .progress-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-card .label {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .current-topic {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .current-topic h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        hr {
+            margin: 20px 0;
+            border: none;
+            border-top: 2px solid #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AI Virtual Teacher</h1>
+            <p>Smart Teaching with Emotion Detection & AI Assistance</p>
+            <div class="system-status">
+                <div class="status-badge" id="deepfaceStatus">🔄 Checking DeepFace...</div>
+                <div class="status-badge" id="geminiStatus">🔄 Checking Gemini...</div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <!-- Left Panel: Profile & Controls -->
+            <div class="panel">
+                <h2>👤 Student Profile</h2>
+                
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" id="studentName" placeholder="Your name">
+                </div>
+                
+                <div class="form-group">
+                    <label>Age</label>
+                    <input type="number" id="studentAge" placeholder="Your age" min="5" max="18">
+                </div>
+                
+                <div class="form-group">
+                    <label>Grade</label>
+                    <input type="text" id="studentGrade" placeholder="Your grade">
+                </div>
+                
+                <button class="btn btn-primary" onclick="saveProfile()">💾 Save Profile</button>
+                
+                <hr>
+                
+                <h2 style="margin-top: 20px;">🎓 Lesson Setup</h2>
+                
+                <div class="form-group">
+                    <label>Language</label>
+                    <select id="language" onchange="changeLanguage()">
+                        <option value="en">English</option>
+                        <option value="tr">Türkçe</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Select Lesson</label>
+                    <select id="lesson" onchange="loadLessonInfo()">
+                        <option value="">-- Choose Lesson --</option>
+                    </select>
+                </div>
+                
+                <div id="lessonInfo" style="display:none; background:white; padding:10px; border-radius:5px; margin-bottom:10px;">
+                    <small id="lessonDetails"></small>
+                </div>
+                
+                <button class="btn btn-success" id="startBtn" onclick="startLesson()" disabled>▶️ Start Lesson</button>
+                <button class="btn btn-danger" id="stopBtn" onclick="stopLesson()" disabled>⏹️ Stop Lesson</button>
+                
+                <hr>
+                
+                <div class="video-container">
+                    <video id="video" autoplay muted></video>
+                    <div class="emotion-badge" id="emotionBadge">😐 analyzing...</div>
+                </div>
+            </div>
+            
+            <!-- Middle Panel: Conversation & Lesson -->
+            <div class="panel">
+                <h2>💬 Lesson & Conversation</h2>
+                
+                <div id="currentTopic" class="current-topic" style="display:none;">
+                    <h3>📚 Current Topic: <span id="topicName"></span></h3>
+                    <p id="topicExplanation"></p>
+                </div>
+                
+                <div class="conversation" id="conversation">
+                    <div class="message system">
+                        <div class="speaker">🤖 System</div>
+                        <div class="text">Welcome to AI Virtual Teacher! Save your profile and select a lesson to start learning.</div>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <input type="text" id="messageInput" placeholder="Type your answer or ask a question..." 
+                           onkeypress="handleEnter(event)" disabled>
+                    <button onclick="sendMessage()" id="sendBtn" disabled>📤 Send</button>
+                </div>
+            </div>
+            
+            <!-- Right Panel: Status & Progress -->
+            <div class="panel">
+                <h2>📊 Session Status</h2>
+                
+                <div class="status">
+                    <div class="status-dot" id="statusDot"></div>
+                    <span id="statusText">Ready to start</span>
+                </div>
+                
+                <div class="status">
+                    <span><strong>Session ID:</strong> <small id="sessionId">Not started</small></span>
+                </div>
+                
+                <div class="progress-stats">
+                    <div class="stat-card">
+                        <div class="value" id="correctCount">0</div>
+                        <div class="label">Correct</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value" id="totalCount">0</div>
+                        <div class="label">Total</div>
+                    </div>
+                </div>
+                
+                <h2 style="margin-top: 20px;">📈 Activity Log</h2>
+                <div class="progress-log" id="progressLog"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Global state
+        let ws = null;
+        let sessionId = 'session_' + Date.now();
+        let currentLanguage = 'en';
+        let videoStream = null;
+        let lessonActive = false;
+        let currentEmotion = 'neutral';
+        let currentQuestion = null;
+        let currentLessonName = null;
+        let currentTopicName = null;
+        let correctAnswers = 0;
+        let totalQuestions = 0;
+        
+        // Initialize
+        document.getElementById('sessionId').textContent = sessionId;
+        
+        // Check system status
+        fetch('http://localhost:8000/api/status')
+            .then(r => r.json())
+            .then(status => {
+                document.getElementById('deepfaceStatus').textContent = 
+                    status.deepface ? '✅ DeepFace Active' : '⚠️ DeepFace Offline';
+                document.getElementById('geminiStatus').textContent = 
+                    status.gemini ? `✅ Gemini (${status.gemini_model})` : '⚠️ Gemini Offline';
+                
+                if (!status.gemini) {
+                    addMessage('system', '⚠️ AI features limited - Gemini not available');
+                }
+            })
+            .catch(err => {
+                console.error('Status check failed:', err);
+                document.getElementById('deepfaceStatus').textContent = '❌ Check Failed';
+                document.getElementById('geminiStatus').textContent = '❌ Check Failed';
+            });
+        
+        // Load available lessons
+        function loadLessons() {
+            fetch(`http://localhost:8000/api/lessons?language=${currentLanguage}`)
+                .then(r => r.json())
+                .then(data => {
+                    const select = document.getElementById('lesson');
+                    select.innerHTML = '<option value="">-- Choose Lesson --</option>';
+                    
+                    Object.keys(data.lessons).forEach(key => {
+                        const option = document.createElement('option');
+                        option.value = key;
+                        option.textContent = data.lessons[key].title;
+                        select.appendChild(option);
+                    });
+                })
+                .catch(err => console.error('Failed to load lessons:', err));
+        }
+        
+        loadLessons();
+        
+        function loadLessonInfo() {
+            const lesson = document.getElementById('lesson').value;
+            if (!lesson) {
+                document.getElementById('lessonInfo').style.display = 'none';
+                document.getElementById('startBtn').disabled = true;
+                return;
+            }
+            
+            fetch(`http://localhost:8000/api/lesson/${lesson}?language=${currentLanguage}`)
+                .then(r => r.json())
+                .then(data => {
+                    const info = document.getElementById('lessonInfo');
+                    const details = document.getElementById('lessonDetails');
+                    details.textContent = `${data.title} - ${data.topics.length} topics`;
+                    info.style.display = 'block';
+                    document.getElementById('startBtn').disabled = false;
+                })
+                .catch(err => console.error('Failed to load lesson info:', err));
+        }
+        
+        // Start camera
+        async function startCamera() {
+            try {
+                videoStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 640, height: 480 } 
+                });
+                document.getElementById('video').srcObject = videoStream;
+                addProgress('✅ Camera started');
+            } catch (error) {
+                console.error('Camera error:', error);
+                addProgress('❌ Camera access denied - emotion detection disabled');
+            }
+        }
+        
+        // WebSocket for emotion detection
+        function startEmotionDetection() {
+            ws = new WebSocket(`ws://localhost:8000/ws/emotion/${sessionId}`);
+            
+            ws.onopen = () => {
+                addProgress('✅ Connected to emotion detector');
+                
+                // Send frames periodically
+                setInterval(() => {
+                    if (videoStream && ws.readyState === WebSocket.OPEN) {
+                        const video = document.getElementById('video');
+                        const canvas = document.createElement('canvas');
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(video, 0, 0);
+                        
+                        const imageData = canvas.toDataURL('image/jpeg', 0.7);
+                        ws.send(imageData);
+                    }
+                }, 1500);  // Every 1.5 seconds
+            };
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                currentEmotion = data.emotion;
+                updateEmotion(data.emotion, data.confidence);
+            };
+            
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                addProgress('❌ Emotion detection error');
+            };
+            
+            ws.onclose = () => {
+                addProgress('⚠️ Emotion detector disconnected');
+            };
+        }
+        
+        function updateEmotion(emotion, confidence) {
+            const badge = document.getElementById('emotionBadge');
+            const emotionIcons = {
+                'confident': '😊',
+                'focused': '🧐',
+                'confused': '😕',
+                'frustrated': '😤',
+                'anxiety': '😰',
+                'curious': '🤔',
+                'bored': '😑',
+                'neutral': '😐',
+                'analyzing': '🔄'
+            };
+            const conf = confidence ? ` (${Math.round(confidence)}%)` : '';
+            badge.textContent = `${emotionIcons[emotion] || '😐'} ${emotion}${conf}`;
+        }
+        
+        function saveProfile() {
+            const name = document.getElementById('studentName').value;
+            const age = document.getElementById('studentAge').value;
+            const grade = document.getElementById('studentGrade').value;
+            
+            if (!name || !age || !grade) {
+                alert('Please fill all profile fields');
+                return;
+            }
+            
+            fetch('http://localhost:8000/api/profile', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ name, age: parseInt(age), grade })
+            })
+            .then(r => r.json())
+            .then(() => {
+                addProgress(`✅ Profile saved: ${name}`);
+                addMessage('teacher', `Nice to meet you, ${name}! I'm your AI teacher. Select a lesson to begin!`);
+                document.getElementById('messageInput').disabled = false;
+                document.getElementById('sendBtn').disabled = false;
+            })
+            .catch(err => console.error('Profile save error:', err));
+        }
+        
+        function changeLanguage() {
+            currentLanguage = document.getElementById('language').value;
+            addProgress(`🌐 Language changed to ${currentLanguage === 'tr' ? 'Turkish' : 'English'}`);
+            loadLessons();
+        }
+        
+        function startLesson() {
+            const lessonName = document.getElementById('lesson').value;
+            if (!lessonName) {
+                alert('Please select a lesson first!');
+                return;
+            }
+            
+            lessonActive = true;
+            currentLessonName = lessonName;
+            correctAnswers = 0;
+            totalQuestions = 0;
+            
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            document.getElementById('statusText').textContent = 'Lesson in progress';
+            document.getElementById('lesson').disabled = true;
+            
+            fetch('http://localhost:8000/api/lesson/start', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    session_id: sessionId,
+                    lesson_name: lessonName,
+                    language: currentLanguage
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                addProgress(`🎓 Started: ${data.lesson_title}`);
+                showTopic(data.topic, data.explanation);
+                addMessage('teacher', `Let's learn about ${data.topic}! ${data.explanation}`);
+                
+                // Get first question after a brief delay
+                setTimeout(askNextQuestion, 2000);
+            })
+            .catch(err => {
+                console.error('Failed to start lesson:', err);
+                alert('Failed to start lesson. Please try again.');
+                stopLesson();
+            });
+        }
+        
+        function showTopic(topicName, explanation) {
+            currentTopicName = topicName;
+            document.getElementById('currentTopic').style.display = 'block';
+            document.getElementById('topicName').textContent = topicName;
+            document.getElementById('topicExplanation').textContent = explanation;
+        }
+        
+        function askNextQuestion() {
+            if (!lessonActive) return;
+            
+            fetch('http://localhost:8000/api/lesson/next_question', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    session_id: sessionId
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.completed) {
+                    addMessage('teacher', `🎉 ${data.message}`);
+                    addProgress('🏆 Lesson completed!');
+                    stopLesson();
+                    showResults();
+                } else if (data.new_topic) {
+                    showTopic(data.topic, data.explanation);
+                    addMessage('teacher', `📚 New topic: ${data.topic}! ${data.explanation}`);
+                    setTimeout(askNextQuestion, 3000);
+                } else {
+                    currentQuestion = data.question_data;
+                    addMessage('teacher', `❓ ${data.question}`);
+                    addProgress(`Question ${data.progress.question}/${data.progress.total_questions}`);
+                }
+            })
+            .catch(err => console.error('Failed to get next question:', err));
+        }
+        
+        function stopLesson() {
+            lessonActive = false;
+            currentQuestion = null;
+            
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('statusText').textContent = 'Lesson stopped';
+            document.getElementById('lesson').disabled = false;
+            document.getElementById('currentTopic').style.display = 'none';
+            
+            addProgress('⏹️ Lesson stopped');
+            addMessage('teacher', "Lesson ended. You can start a new one or just chat with me!");
+        }
+        
+        function showResults() {
+            const accuracy = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+            addMessage('system', `📊 Results: ${correctAnswers}/${totalQuestions} correct (${accuracy}% accuracy)`);
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            addMessage('student', message);
+            input.value = '';
+            
+            if (lessonActive && currentQuestion) {
+                // Evaluate answer
+                evaluateAnswer(message);
+            } else {
+                // General chat
+                generalChat(message);
+            }
+        }
+        
+        function evaluateAnswer(answer) {
+            fetch('http://localhost:8000/api/evaluate_answer', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    session_id: sessionId,
+                    question_data: currentQuestion,
+                    answer: answer,
+                    language: currentLanguage,
+                    lesson_name: currentLessonName,
+                    topic_name: currentTopicName
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                totalQuestions++;
+                if (data.correct) correctAnswers++;
+                
+                updateStats();
+                
+                addMessage('teacher', data.response);
+                speakText(data.response);
+                
+                const emoji = data.correct ? '✅' : '❌';
+                const conf = Math.round(data.confidence * 100);
+                addProgress(`${emoji} Answer ${data.correct ? 'correct' : 'incorrect'} (${conf}% confidence, emotion: ${data.emotion})`);
+                
+                // Move to next question
+                currentQuestion = null;
+                setTimeout(askNextQuestion, 3000);
+            })
+            .catch(err => {
+                console.error('Evaluation error:', err);
+                addMessage('system', 'Sorry, there was an error evaluating your answer.');
+            });
+        }
+        
+        function generalChat(message) {
+            fetch('http://localhost:8000/api/chat', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    message: message,
+                    session_id: sessionId,
+                    language: currentLanguage
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                addMessage('teacher', data.response);
+                speakText(data.response);
+            })
+            .catch(err => console.error('Chat error:', err));
+        }
+        
+        function updateStats() {
+            document.getElementById('correctCount').textContent = correctAnswers;
+            document.getElementById('totalCount').textContent = totalQuestions;
+        }
+        
+        function handleEnter(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+        
+        function addMessage(type, text) {
+            const conv = document.getElementById('conversation');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${type}`;
+            
+            const speakers = {
+                'teacher': '🤖 AI Teacher',
+                'student': '👤 You',
+                'system': '💡 System'
+            };
+            
+            msgDiv.innerHTML = `
+                <div class="speaker">${speakers[type]}</div>
+                <div class="text">${text}</div>
+            `;
+            
+            conv.appendChild(msgDiv);
+            conv.scrollTop = conv.scrollHeight;
+        }
+        
+        function addProgress(text) {
+            const log = document.getElementById('progressLog');
+            const time = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.textContent = `[${time}] ${text}`;
+            log.appendChild(div);
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                // Cancel any ongoing speech
+                window.speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.9;
+                utterance.pitch = 1.1;
+                utterance.lang = currentLanguage === 'tr' ? 'tr-TR' : 'en-US';
+                
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+        
+        // Initialize on load
+        window.onload = () => {
+            startCamera();
+            startEmotionDetection();
+            addProgress('🚀 System initialized');
+        };
+        
+        // Cleanup on page unload
+        window.onbeforeunload = () => {
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+            }
+            if (ws) {
+                ws.close();
+            }
+        };
+    </script>
+</body>
+</html>

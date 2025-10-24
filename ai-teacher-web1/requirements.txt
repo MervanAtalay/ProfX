@@ -1,0 +1,22 @@
+# Web Framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+websockets>=12.0
+
+# Image & Video Processing
+opencv-python>=4.8.0
+pillow>=10.0.0
+numpy>=1.24.0,<2.0.0
+
+# AI/ML
+tensorflow>=2.15.0
+tf-keras
+deepface>=0.0.79
+
+# Google Gemini
+google-genai>=0.2.0
+
+# Additional
+python-dateutil>=2.8.2
+requests>=2.31.0
