@@ -1,0 +1,16 @@
+opencv-python>=4.8.0
+deepface>=0.0.79
+tensorflow>=2.12.0
+numpy>=1.24.0
+pillow>=9.5.0
+
+# Core dependencies
+pip install opencv-python numpy deepface
+pip install speechrecognition pyttsx3 pyaudio
+pip install librosa soundfile
+pip install whisper-openai
+pip install openai  # Optional for better AI responses
+
+# Additional
+pip install tkinter  # Usually pre-installed
+pip install sqlite3  # Usually pre-installed
