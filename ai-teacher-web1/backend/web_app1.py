@@ -9,7 +9,7 @@ import os
 import sqlite3
 import asyncio
 import platform
-import base64  # ✅ ALWAYS IMPORT (needed for WebSocket in both dev and prod)
+import base64  # ✅ ALWAYS IMPORT (needed in production too!)
 
 # Check if production (Linux) or development (Windows)
 IS_PRODUCTION = platform.system() == "Linux"
@@ -147,19 +147,6 @@ LESSONS_EN = {
                 ]
             }
         ]
-    },
-    "english": {
-        "title": "Basic English",
-        "topics": [
-            {
-                "title": "Colors",
-                "explanation": "Colors are what we see around us. The sky is blue, grass is green, and the sun is yellow.",
-                "questions": [
-                    {"question": "What color is the sky?", "answer": "blue", "alternatives": []},
-                    {"question": "What color is grass?", "answer": "green", "alternatives": []}
-                ]
-            }
-        ]
     }
 }
 
@@ -182,19 +169,6 @@ LESSONS_TR = {
                 "questions": [
                     {"question": "10 eksi 4 kaç eder?", "answer": "6", "alternatives": ["altı"]},
                     {"question": "8 kurabiyeniz varsa ve 3 tanesini yerseniz, kaç tane kalır?", "answer": "5", "alternatives": ["beş"]}
-                ]
-            }
-        ]
-    },
-    "ingilizce": {
-        "title": "Temel İngilizce",
-        "topics": [
-            {
-                "title": "Renkler",
-                "explanation": "Renkler etrafımızda gördüğümüz şeylerdir. Gökyüzü mavidir, çimen yeşildir ve güneş sarıdır.",
-                "questions": [
-                    {"question": "Gökyüzü hangi renktir?", "answer": "mavi", "alternatives": ["blue"]},
-                    {"question": "Çimen hangi renktir?", "answer": "yeşil", "alternatives": ["green"]}
                 ]
             }
         ]
@@ -230,6 +204,7 @@ async def root():
 async def get_status():
     """Get system status"""
     return {
+        "status": "running",
         "deepface": DEEPFACE_AVAILABLE,
         "opencv": OPENCV_AVAILABLE,
         "gemini": gemini_client is not None,
@@ -392,25 +367,25 @@ async def websocket_emotion(websocket: WebSocket, session_id: str):
             # Receive data from frontend
             data = await websocket.receive_text()
             
-            # PRODUCTION MODE - Return default emotion (no ML processing)
+            # PRODUCTION MODE - Return default emotion (no heavy processing)
             if IS_PRODUCTION or not DEEPFACE_AVAILABLE or not OPENCV_AVAILABLE:
                 await websocket.send_json({
                     'emotion': 'focused',
                     'confidence': 0.75,
                     'all_emotions': {'focused': 75.0, 'neutral': 25.0},
                     'timestamp': datetime.now().isoformat(),
-                    'note': 'Production mode - emotion detection disabled'
+                    'mode': 'production'
                 })
                 await asyncio.sleep(2)
                 continue
             
-            # DEVELOPMENT MODE - Try emotion detection with DeepFace
+            # DEVELOPMENT MODE - Try emotion detection
             try:
                 import cv2
                 import numpy as np
                 from deepface import DeepFace
                 
-                # Decode base64 image
+                # Decode image
                 img_data = base64.b64decode(data.split(',')[1])
                 nparr = np.frombuffer(img_data, np.uint8)
                 frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
